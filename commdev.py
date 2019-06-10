@@ -2,10 +2,16 @@ import discord
 from discord.ext import commands
 import aiohttp
 import re
+import json
 from datetime import timedelta
 import traceback
 import os
 from random import choice, randint
+ConfigLoc = 'config.json'
+r=open(ConfigLoc,"r")
+data=json.load(r)
+ConfigJSON=list(data.values())
+TOKEN=ConfigJSON[0]
 
 owner = ["474266825773809665"]
 
@@ -116,4 +122,4 @@ async def ping():
     """Pong!"""
     await bot.reply("Pong!")
 
-bot.run('Insert-Bot-Token')
+bot.run(TOKEN)
