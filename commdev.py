@@ -7,7 +7,7 @@ import traceback
 import os
 from random import choice, randint
 
-owner = ["Insert-Owner-ID"]
+owner = ["474266825773809665"]
 
 bot = commands.Bot(command_prefix='>', description="Simple Community-Developed Server Bot")
 
