@@ -92,13 +92,13 @@ async def setavatar(ctx, url):
 	await bot.say("I changed my icon")
 
 @bot.command()
-async def invite():
+async def invite(ctx):
   	"""Bot Invite"""
   	await bot.say("\U0001f44d")
   	await bot.whisper("Add me with this link {}".format(discord.utils.oauth_url(bot.user.id)))
 
 @bot.command()
-async def guildcount():
+async def guildcount(ctx):
   	"""Bot Guild Count"""
   	await bot.say("**I'm in {} Guilds!**".format(len(bot.servers)))
 
@@ -118,7 +118,7 @@ async def send_cmd_help(ctx):
             await bot.send_message(ctx.message.channel, embed=em)
 
 @bot.command(pass_context=True)
-async def ping():
+async def ping(ctx):
     """Pong!"""
     await bot.reply("Pong!")
 
