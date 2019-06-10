@@ -9,7 +9,7 @@ from random import choice, randint
 
 owner = ["Insert-Owner-ID"]
 
-bot = commands.Bot(command_prefix='Insert-Prefix', description="Insert-Description")
+bot = commands.Bot(command_prefix='+', description="Simple Community-Developed Server Bot")
 
 @bot.event
 async def on_ready():
