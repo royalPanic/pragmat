@@ -12,6 +12,6 @@ bot = commands.Bot(command_prefix='>') #allows you to change the bot's prefix
 
 @bot.command()
 async def repeat(ctx, arg):
-    await ctx.send(arg)
+    await ctx.send(str(arg))
 
 bot.run(TOKEN) #insert bot token here
