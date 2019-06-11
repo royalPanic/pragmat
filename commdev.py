@@ -22,6 +22,12 @@ async def repeat(ctx, arg):
 async def hitormiss(ctx):
     await ctx.send("I guess I never miss, huh?")
 
+@bot.event # Hopefully handles DMs while bot is online
+async def on_message(message):
+    if isinstance(message.channel, discord.DMChannel):
+        print(f'{message.content} prviate message from {message.author}')
+    await bot.process_commands(message)
+
 @bot.event
 async def on_connect():
     print("Connecting...")
