@@ -9,14 +9,22 @@ data=json.load(r)
 ConfigJSON=list(data.values())
 TOKEN=ConfigJSON[0]
 bot = commands.Bot(command_prefix='>') #allows you to change the bot's prefix
-client = discord.Client()
 
 @bot.event
 async def on_ready():
-    print('We have logged in as {0.user}'.format(client))
+    print('We have logged in as {0.user}'.format(bot))
 
 @bot.command()
 async def repeat(ctx, arg):
     await ctx.send(str(arg))
+
+@bot.command()
+async def hitormiss(ctx):
+    await ctx.send("I guess I never miss, huh?")
+
+@bot.event
+async def on_connect():
+    print("Connecting...")
+
 
 bot.run(TOKEN) #insert bot token here
