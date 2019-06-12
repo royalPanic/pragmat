@@ -89,4 +89,4 @@ def load_some_cogs():
 
 
 load_some_cogs()
-bot.run(TOKEN, bot=True, reconnect=True) #insert bot token here
+bot.run(TOKEN, bot=True, reconnect=True)
