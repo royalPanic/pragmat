@@ -29,11 +29,11 @@ async def on_command_error(ctx, error):
         embed = discord.Embed(title=f'Command: {ctx.command.name}', colour=discord.Colour(0xFF0000),
                     description=f"{ctx.author.name}, you are on cooldown for this command for {error.retry_after:.2f}s")
         await ctx.send(embed=embed)
-
+        return
     if isinstance(error, NotContributor):
         e = discord.Embed(colour=discord.Colour(0xFF0000), description=f"{ctx.author.name}, you aren't a contributor.")
         await ctx.send(embed=e)
-
+        return
     else:
         e = discord.Embed(colour=discord.Colour(0xFF0000), description=f"{error}")
         await ctx.send(embed=e)
@@ -82,9 +82,9 @@ def load_some_cogs():
         for extension in bot.startup_extensions:
             try:
                 bot.load_extension(extension)
-                print('Loaded {}'.format(extension))
+                print(f'Loaded {extension}')
             except Exception as e:
-                exc = '{}: {}'.format(type(e).__name__, e)
+                exc = f'{type(e).__name__}: {e}'
                 print(f'Failed to load extension {extension}\n{exc}')
 
 

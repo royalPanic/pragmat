@@ -1,6 +1,6 @@
 from discord.ext import commands
 from cogs.util import check
-
+import discord
 
 class General(commands.Cog):
     def __init__(self, bot):
@@ -27,6 +27,11 @@ class General(commands.Cog):
         msg = "".join("    " if char == ' ' else f':regional_indicator_{char}:' for char in string if char.isalnum() or
                        char == ' ')
         await ctx.send(f'{msg}')
+
+    @commands.cooldown(1, 120, commands.BucketType.user)
+    @commands.command(cooldown_after_parsing=True)
+    async def test(self, ctx, url: discord.Invite):
+        print(url)
 
 
 def setup(bot):
