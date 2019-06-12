@@ -28,10 +28,6 @@ class General(commands.Cog):
                        char == ' ')
         await ctx.send(f'{msg}')
 
-    @commands.cooldown(1, 120, commands.BucketType.user)
-    @commands.command(cooldown_after_parsing=True)
-    async def test(self, ctx, url: discord.Invite):
-        print(url)
 
 
 def setup(bot):
