@@ -1,125 +1,92 @@
 import discord
 from discord.ext import commands
-import aiohttp
-import re
-import json
-from datetime import timedelta
-import traceback
+import jthon
+from pathlib import Path
 import os
-from random import choice, randint
-ConfigLoc = 'config.json'
-r=open(ConfigLoc,"r")
-data=json.load(r)
-ConfigJSON=list(data.values())
-TOKEN=ConfigJSON[0]
+from cogs.util.errors import NotContributor
+config = jthon.load('config')
+TOKEN = config.get('token').data
 
-owner = ["474266825773809665"]
 
-bot = commands.Bot(command_prefix='>', description="Simple Community-Developed Server Bot")
+def get_prefix(bot, message):
+    prefix = config.get('prefix')
+    if not prefix:
+        prefix = '>'
+    return commands.when_mentioned_or(*prefix)(bot, message)
+
+
+bot = commands.Bot(command_prefix=get_prefix) #allows you to change the bot's prefix
+
 
 @bot.event
 async def on_ready():
-    print('Logged in as')
-    print(bot.user.name)
-    print(bot.user.id)
-    print('------')
-    print(discord.utils.oauth_url(bot.user.id))
+    print(f"We have logged in as {bot.user.name}")
 
-@bot.command(pass_context=True, hidden=True)
-async def setgame(ctx, *, game):
-    if ctx.message.author.id not in owner:
-        return
-    game = game.strip()
-    if game != "":
-        try:
-            await bot.change_presence(game=discord.Game(name=game))
-        except:
-            await bot.say("Failed to change game")
-        else:
-            await bot.say("Successfuly changed game to {}".format(game))
-    else:
-        await bot.send_cmd_help(ctx)
-
-@bot.command(pass_context=True, hidden=True)
-async def setname(ctx, *, name):
-    if ctx.message.author.id not in owner:
-        return
-    name = name.strip()
-    if name != "":
-        try:
-            await bot.edit_profile(username=name)
-        except:
-            await bot.say("Failed to change name")
-        else:
-            await bot.say("Successfuly changed name to {}".format(name))
-    else:
-        await bot.send_cmd_help(ctx)
 
 @bot.event
-async def on_command_error(error, ctx):
-    channel = ctx.message.channel
-    if isinstance(error, commands.MissingRequiredArgument):
-        await send_cmd_help(ctx)
-    elif isinstance(error, commands.BadArgument):
-        await send_cmd_help(ctx)
-    elif isinstance(error, commands.CommandInvokeError):
-        print("Exception in command '{}', {}".format(ctx.command.qualified_name, error.original))
-        traceback.print_tb(error.original.__traceback__)
+async def on_command_error(ctx, error):
+    if isinstance(error, commands.CommandOnCooldown):
+        embed = discord.Embed(title=f'Command: {ctx.command.name}', colour=discord.Colour(0xFF0000),
+                    description=f"{ctx.author.name}, you are on cooldown for this command for {error.retry_after:.2f}s")
+        await ctx.send(embed=embed)
 
-@bot.command(pass_context=True, no_pm=True)
-async def avatar(ctx, member: discord.Member):
-    """User Avatar"""
-    await bot.reply("{}".format(member.avatar_url))
+    if isinstance(error, NotContributor):
+        e = discord.Embed(colour=discord.Colour(0xFF0000), description=f"{ctx.author.name}, you aren't a contributor.")
+        await ctx.send(embed=e)
 
-@bot.command(pass_context=True, no_pm=True)
-async def guildicon(ctx):
-    """Guild Icon"""
-    await bot.reply("{}".format(ctx.message.server.icon_url))
+    else:
+        e = discord.Embed(colour=discord.Colour(0xFF0000), description=f"{error}")
+        await ctx.send(embed=e)
 
-@bot.command(pass_context=True)
-async def guildid(ctx):
-	  """Guild ID"""
-	  await bot.say("`{}`".format(ctx.message.server.id))
 
-@bot.command(pass_context=True, hidden=True)
-async def setavatar(ctx, url):
-	if ctx.message.author.id not in owner:
-		return
-	async with aiohttp.ClientSession() as session:
-		async with session.get(url) as r:
-			data = await r.read()
-	await bot.edit_profile(avatar=data)
-	await bot.say("I changed my icon")
+@bot.check #no replying to bots
+async def __before_invoke(ctx):
+    if not ctx.message.author.bot:
+        return True
 
-@bot.command()
-async def invite(ctx):
-  	"""Bot Invite"""
-  	await bot.say("\U0001f44d")
-  	await bot.whisper("Add me with this link {}".format(discord.utils.oauth_url(bot.user.id)))
 
-@bot.command()
-async def guildcount(ctx):
-  	"""Bot Guild Count"""
-  	await bot.say("**I'm in {} Guilds!**".format(len(bot.servers)))
+@commands.is_owner()
+@bot.command(aliases=['sp'])
+async def setprefix(ctx, prefix: str=None):
+    if not prefix or len(prefix) >= 3:
+        await ctx.send("Please provide the prefix you would like to use between 1-2 chars.")
+    else:
+        config['prefix'] = prefix
+        config.save()
+        await ctx.send(f'Prefix updated to: {prefix}')
+
+
+@bot.event # Hopefully handles DMs while bot is online
+async def on_message(message):
+    if isinstance(message.channel, discord.DMChannel):
+        print(f'{message.content} prviate message from {message.author}')
+    await bot.process_commands(message)
+
 
 @bot.event
-async def send_cmd_help(ctx):
-    if ctx.invoked_subcommand:
-        pages = bot.formatter.format_help_for(ctx, ctx.invoked_subcommand)
-        for page in pages:
-            em = discord.Embed(description=page.strip("```").replace('<', '[').replace('>', ']'),
-                               color=discord.Color.blue())
-            await bot.send_message(ctx.message.channel, embed=em)
-    else:
-        pages = bot.formatter.format_help_for(ctx, ctx.command)
-        for page in pages:
-            em = discord.Embed(description=page.strip("```").replace('<', '[').replace('>', ']'),
-                               color=discord.Color.blue())
-            await bot.send_message(ctx.message.channel, embed=em)
+async def on_connect():
+    print("Connecting...")
 
-@bot.command(pass_context=True)
-async def ping(ctx):
-    """Pong!"""
-    await bot.reply("Pong!")
 
-bot.run(TOKEN)
+def load_some_cogs():
+    bot.startup_extensions = []
+    path = Path('./cogs')
+    for dirpath, dirnames, filenames in os.walk(path):
+        if dirpath.strip('./') == str(path):
+            for cog in filenames:
+                if cog.endswith('.py') and not cog.startswith('_'):
+                    extension = 'cogs.'+cog[:-3]
+                    bot.startup_extensions.append(extension)
+
+    if __name__ == "__main__":
+        for extension in bot.startup_extensions:
+            try:
+                bot.load_extension(extension)
+                print('Loaded {}'.format(extension))
+            except Exception as e:
+                exc = '{}: {}'.format(type(e).__name__, e)
+                print(f'Failed to load extension {extension}\n{exc}')
+
+
+load_some_cogs()
+bot.run(TOKEN, bot=True, reconnect=True) #insert bot token here
