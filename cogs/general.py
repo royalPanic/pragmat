@@ -7,11 +7,6 @@ class General(commands.Cog):
         self.bot = bot
 
     @commands.command()
-    async def ping(self, ctx):
-        """Pong"""
-        await ctx.send("Pong!")
-
-    @commands.command()
     async def repeat(self, ctx, *, arg):
         await ctx.send(f"{arg}")
 
@@ -24,8 +19,10 @@ class General(commands.Cog):
     @commands.cooldown(1, 120, commands.BucketType.user)
     async def example(self, ctx, *, string: str = None):
         """Example of a check for user being a contributor"""
-        msg = "".join("    " if char == ' ' else f':regional_indicator_{char}:' for char in string if char.isalnum() or
-                       char == ' ')
+        nums_dict = {"0": ":zero:", "1": ":one:", "2": ":two:", "3": ":three:", "4": ":four:", "5": ":five:", "6": ":six:",
+                     "7": ":seven:", "8": ":eight:", "9": ":nine:", " ": "    "}
+        msg = "".join(f"{nums_dict.get(char)}" if char in list(nums_dict) else f':regional_indicator_{char}:'
+                      for char in string if char.isalpha() or char in list(nums_dict))
         await ctx.send(f'{msg}')
 
 
