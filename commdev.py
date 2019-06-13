@@ -59,7 +59,7 @@ async def setprefix(ctx, prefix: str=None):
 @bot.event # Hopefully handles DMs while bot is online
 async def on_message(message):
     if isinstance(message.channel, discord.DMChannel):
-        print(f'{message.content} prviate message from {message.author}')
+        print(f'{message.content} private message from {message.author}')
     await bot.process_commands(message)
 
 
