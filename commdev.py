@@ -29,11 +29,11 @@ async def on_command_error(ctx, error):
         embed = discord.Embed(title=f'Command: {ctx.command.name}', colour=discord.Colour(0xFF0000),
                     description=f"{ctx.author.name}, you are on cooldown for this command for {error.retry_after:.2f}s")
         await ctx.send(embed=embed)
-
+        return
     if isinstance(error, NotContributor):
         e = discord.Embed(colour=discord.Colour(0xFF0000), description=f"{ctx.author.name}, you aren't a contributor.")
         await ctx.send(embed=e)
-
+        return
     else:
         e = discord.Embed(colour=discord.Colour(0xFF0000), description=f"{error}")
         await ctx.send(embed=e)
@@ -59,7 +59,7 @@ async def setprefix(ctx, prefix: str=None):
 @bot.event # Hopefully handles DMs while bot is online
 async def on_message(message):
     if isinstance(message.channel, discord.DMChannel):
-        print(f'{message.content} prviate message from {message.author}')
+        print(f'{message.content} private message from {message.author}')
     await bot.process_commands(message)
 
 
@@ -82,11 +82,11 @@ def load_some_cogs():
         for extension in bot.startup_extensions:
             try:
                 bot.load_extension(extension)
-                print('Loaded {}'.format(extension))
+                print(f'Loaded {extension}')
             except Exception as e:
-                exc = '{}: {}'.format(type(e).__name__, e)
+                exc = f'{type(e).__name__}: {e}'
                 print(f'Failed to load extension {extension}\n{exc}')
 
 
 load_some_cogs()
-bot.run(TOKEN, bot=True, reconnect=True) #insert bot token here
+bot.run(TOKEN, bot=True, reconnect=True)

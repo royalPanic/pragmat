@@ -7,11 +7,6 @@ class General(commands.Cog):
         self.bot = bot
 
     @commands.command()
-    async def ping(self, ctx):
-        """Pong"""
-        await ctx.send("Pong!")
-
-    @commands.command()
     async def repeat(self, ctx, *, arg):
         await ctx.send(f"{arg}")
 
