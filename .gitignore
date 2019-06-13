@@ -1,3 +1,7 @@
 *.json
 .idea/workspace.xml
 *.pyc
+*.iml
+*.xml
+cogs/for_me.py
+webhook.py
